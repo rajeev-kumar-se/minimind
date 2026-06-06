@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiniMind Trainer Suite — Complete Reference</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+    padding: 0;
+  }
+  .header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px 32px; text-align: center;
+  }
+  .header h1 { font-size: 2.5rem; background: linear-gradient(90deg, var(--accent), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header p { color: var(--text-dim); margin-top: 8px; font-size: 1.1rem; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin-bottom: 32px; }
+  .toc h2 { margin-bottom: 12px; font-size: 1.1rem; color: var(--accent); }
+  .toc ol { columns: 2; column-gap: 32px; padding-left: 20px; }
+  .toc li { margin-bottom: 4px; }
+  .toc a { color: var(--text-dim); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 24px; overflow: hidden; }
+  .card-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .card-header h2 { font-size: 1.15rem; }
+  .card-header .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 12px;
+    font-size: 0.75rem; font-weight: 600;
+  }
+  .badge-core { background: #1f6feb33; color: var(--accent); border: 1px solid #1f6feb66; }
+  .badge-sft { background: #23863633; color: var(--green); border: 1px solid #23863666; }
+  .badge-rl { background: #9e6a0333; color: var(--orange); border: 1px solid #9e6a0366; }
+  .badge-extra { background: #bc8cff33; color: var(--purple); border: 1px solid #bc8cff66; }
+  .card-body { padding: 20px; }
+  .card-body h3 { color: var(--accent); font-size: 1rem; margin: 20px 0 8px; }
+  .card-body h3:first-child { margin-top: 0; }
+  .card-body p, .card-body li { color: var(--text-dim); font-size: 0.92rem; }
+
+  code { background: #1f2937; color: #f0c674; padding: 1px 5px; border-radius: 4px; font-size: 0.85rem; font-family: 'JetBrains Mono', 'Cascadia Code', monospace; }
+  pre {
+    background: #12161e; border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px 16px; overflow-x: auto; margin: 10px 0;
+    font-size: 0.82rem; line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; color: #e6edf3; }
+  .token-comment { color: #8b949e; font-style: italic; }
+  .token-keyword { color: #ff7b72; }
+  .token-string { color: #a5d6ff; }
+  .token-function { color: #d2a8ff; }
+  .token-number { color: #79c0ff; }
+  .token-operator { color: #ffa657; }
+  .token-type { color: #ffa657; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th { background: #1c2333; text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border); color: var(--accent); font-weight: 600; }
+  td { padding: 6px 12px; border-bottom: 1px solid var(--border); color: var(--text-dim); }
+  tr:hover td { background: #1a1f2e; }
+
+  .mermaid-box { background: #fff; border-radius: 6px; padding: 12px; margin: 10px 0; text-align: center; }
+  .math { background: #12161e; border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; margin: 10px 0; text-align: center; font-size: 1.1rem; color: #d2a8ff; font-style: italic; }
+  .data-sample { background: #12161e; border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin: 10px 0; font-size: 0.8rem; color: var(--text-dim); white-space: pre-wrap; word-break: break-all; }
+  .flow-arrow { color: var(--text-dim); font-size: 0.85rem; }
+
+  @media (max-width: 768px) {
+    .toc ol { columns: 1; }
+    .header h1 { font-size: 1.6rem; }
+  }
+  .utils-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin: 10px 0; }
+  .utils-card { background: #12161e; border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+  .utils-card .fn { color: var(--accent); font-weight: 600; font-family: monospace; }
+  .utils-card .desc { color: var(--text-dim); font-size: 0.82rem; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>MiniMind Trainer Suite</h1>
+  <p>Complete reference — architecture, math, data formats, loss functions &amp; hyperparameters</p>
+</div>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<div class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#overview">Training Pipeline Overview</a></li>
+    <li><a href="#pretrain">train_pretrain.py</a></li>
+    <li><a href="#sft">train_full_sft.py</a></li>
+    <li><a href="#lora">train_lora.py</a></li>
+    <li><a href="#dpo">train_dpo.py</a></li>
+    <li><a href="#ppo">train_ppo.py</a></li>
+    <li><a href="#grpo">train_grpo.py</a></li>
+    <li><a href="#agent">train_agent.py</a></li>
+    <li><a href="#distill">train_distillation.py</a></li>
+    <li><a href="#tokenizer">train_tokenizer.py</a></li>
+    <li><a href="#rollout">rollout_engine.py</a></li>
+    <li><a href="#utils">trainer_utils.py</a></li>
+    <li><a href="#datasets">Datasets (lm_dataset.py)</a></li>
+    <li><a href="#lora-impl">LoRA (model_lora.py)</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<section id="overview">
+<div class="card">
+  <div class="card-header"><h2>Training Pipeline Overview</h2><span class="badge badge-core">Core</span></div>
+  <div class="card-body">
+    <p>MiniMind follows a staged training pipeline typical of modern LLMs. Each stage builds on the previous one:</p>
+    <div class="mermaid-box">
+      <pre class="mermaid" style="background:transparent;">
+graph LR
+    A["Pretrain<br/>train_pretrain.py"] --> B["Full SFT<br/>train_full_sft.py"]
+    B --> C["DPO<br/>train_dpo.py"]
+    B --> D["PPO/GRPO<br/>train_ppo.py / train_grpo.py"]
+    B --> E["Agentic RL<br/>train_agent.py"]
+    B --> F["Distillation<br/>train_distillation.py"]
+    B --> G["LoRA<br/>train_lora.py"]
+    style A fill:#1f6feb33,stroke:#58a6ff
+    style B fill:#23863633,stroke:#3fb950
+    style C,D,E fill:#9e6a0333,stroke:#d29922
+    style F,G fill:#bc8cff33,stroke:#bc8cff
+      </pre>
+    </div>
+    <h3>Pipeline Flow</h3>
+    <ol>
+      <li><strong>Pretrain</strong> — learns language patterns &amp; world knowledge via next-token prediction on raw text.</li>
+      <li><strong>Full SFT</strong> — instruction-following on assistant responses only (prompt tokens masked).</li>
+      <li><strong>RLHF/DPO</strong> — aligns model to human preferences using chosen/rejected pairs.</li>
+      <li><strong>RLAIF (PPO/GRPO)</strong> — optimizes generation via reinforcement learning with a reward model.</li>
+      <li><strong>Agentic RL</strong> — multi-turn tool-use training with GRPO/CISPO and ground-truth verification.</li>
+      <li><strong>Distillation</strong> — compresses a larger teacher model into a smaller student using KL divergence.</li>
+      <li><strong>LoRA</strong> — parameter-efficient fine-tuning via low-rank adapters.</li>
+    </ol>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="pretrain">
+<div class="card">
+  <div class="card-header"><h2>train_pretrain.py</h2><span class="badge badge-core">Pretrain</span></div>
+  <div class="card-body">
+    <h3>Goal</h3>
+    <p>Autoregressive next-token prediction on raw text corpus. Builds the model's base knowledge of language patterns, facts, and syntax.</p>
+
+    <h3>Data Format</h3>
+    <p>JSONL with a single <code>"text"</code> field. Loaded via <code>PretrainDataset</code> which appends BOS/EOS tokens and pads to <code>max_seq_len</code> (default 340).</p>
+    <div class="data-sample">{"text": "Transformer通过自注意力机制建模上下文关系，是现代大语言模型的重要基础结构。"}
+{"text": "机器学习是人工智能的核心技术之一，通过算法让计算机从数据中学习规律。"}</div>
+
+    <h3>Architecture Flow</h3>
+    <div class="mermaid-box">
+      <pre class="mermaid" style="background:transparent;">
+graph LR
+    A["Raw Text<br/>jsonl"] --> B["Tokenize<br/>BOS + tokens + EOS"]
+    B --> C["Pad to<br/>max_seq_len"]
+    C --> D["MiniMind<br/>Transformer"]
+    D --> E["Cross-Entropy<br/>Loss (all tokens)"]
+    D --> F["MoE Aux Loss<br/>(if use_moe)"]
+    E --> G["loss = CE + aux_loss"]
+    F --> G
+      </pre>
+    </div>
+
+    <h3>Loss Function</h3>
+    <p>The model's built-in cross-entropy over the entire sequence (no masking — every token is trained).</p>
+    <pre><code><span class="token-comment"># Inside training loop</span>
+res = model(input_ids, labels=labels)
+loss = res.loss + res.aux_loss   <span class="token-comment"># aux_loss is 0 if not MoE</span>
+loss = loss / args.accumulation_steps</code></pre>
+
+    <h3>Learning Rate Schedule</h3>
+    <pre><code><span class="token-keyword">def</span> <span class="token-function">get_lr</span>(current_step, total_steps, lr):
+    cosine = math.cos(math.pi * current_step / total_steps)
+    <span class="token-keyword">return</span> lr * (0.1 + 0.45 * (1 + cosine))</code></pre>
+
+    <h3>Key Hyperparameters</h3>
+    <table>
+      <tr><th>Param</th><th>Default</th><th>Description</th></tr>
+      <tr><td><code>--epochs</code></td><td>2</td><td>Training epochs</td></tr>
+      <tr><td><code>--batch_size</code></td><td>32</td><td>Batch size</td></tr>
+      <tr><td><code>--learning_rate</code></td><td>5e-4</td><td>Peak learning rate</td></tr>
+      <tr><td><code>--max_seq_len</code></td><td>340</td><td>Max tokens per sample</td></tr>
+      <tr><td><code>--accumulation_steps</code></td><td>8</td><td>Gradient accumulation</td></tr>
+      <tr><td><code>--dtype</code></td><td>bfloat16</td><td>Mixed precision dtype</td></tr>
+      <tr><td><code>--data_path</code></td><td>../dataset/pretrain_t2t_mini.jsonl</td><td>Training data</td></tr>
+      <tr><td><code>--from_weight</code></td><td>none</td><td>Resume from weight</td></tr>
+    </table>
+
+    <h3>Output</h3>
+    <p><code>out/pretrain_{hidden_size}.pth</code> — full model weights in half precision. Resume checkpoint in <code>checkpoints/</code>.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="sft">
+<div class="card">
+  <div class="card-header"><h2>train_full_sft.py</h2><span class="badge badge-sft">SFT</span></div>
+  <div class="card-body">
+    <h3>Goal</h3>
+    <p>Supervised Fine-Tuning on instruction-response pairs. Only the <strong>assistant's response tokens</strong> contribute to the loss — prompt tokens are masked with <code>-100</code>.</p>
+
+    <h3>Data Format</h3>
+    <p>JSONL with <code>conversations</code> array. Supports multi-turn, tool calls, thinking tags, and system prompts.</p>
+    <div class="data-sample">{ "conversations": [
+  {"role": "system", "content": "你是MiniMind，一个乐于助人的AI助手。"},
+  {"role": "user", "content": "解释什么是机器学习"},
+  {"role": "assistant", "content": "机器学习是人工智能的核心技术之一..."}
+]}</div>
+
+    <h3>Architecture Flow</h3>
+    <div class="mermaid-box">
+      <pre class="mermaid" style="background:transparent;">
+graph LR
+    A["Conversation<br/>jsonl"] --> B["apply_chat_template<br/>&lt;|im_start|&gt;..."]
+    B --> C["generate_labels()<br/>mask prompt → -100"]
+    C --> D["MiniMind<br/>Transformer"]
+    D --> E["Cross-Entropy<br/>on assistant tokens only"]
+    D --> F["MoE Aux Loss"]
+    E --> G["loss = CE + aux_loss"]
+    F --> G
+      </pre>
+    </div>
+
+    <h3>Label Masking Logic</h3>
+    <p>In <code>SFTDataset.generate_labels()</code>:</p>
+    <pre><code><span class="token-comment"># Everything before the first "assistant\n" after a BOS token gets label -100</span>
+<span class="token-comment"># Only tokens after "assistant\n" and before the EOS are kept as labels</span>
+<span class="token-comment"># All padding positions also get -100</span>
+labels[j] = input_ids[j]  <span class="token-comment"># only for assistant response tokens</span></code></pre>
+
+    <h3>Loss</h3>
+    <pre><code><span class="token-comment"># Same as pretrain at the code level, but labels already have -100 masking</span>
+res = model(input_ids, labels=labels)
+loss = res.loss + res.aux_loss</code></pre>
+
+    <h3>Key Hyperparameters</h3>
+    <table>
+      <tr><th>Param</th><th>Default</th><th>Description</th></tr>
+      <tr><td><code>--epochs</code></td><td>2</td><td>Training epochs</td></tr>
+      <tr><td><code>--batch_size</code></td><td>16</td><td>Batch size</td></tr>
+      <tr><td><code>--learning_rate</code></td><td>1e-5</td><td>Lower LR than pretrain</td></tr>
+      <tr><td><code>--max_seq_len</code></td><td>768</td><td>Max tokens per sample</td></tr>
+      <tr><td><code>--from_weight</code></td><td>pretrain</td><td>Base model weight</td></tr>
+      <tr><td><code>--data_path</code></td><td>../dataset/sft_t2t_mini.jsonl</td><td>Training data</td></tr>
+    </table>
+
+    <h3>Output</h3>
+    <p><code>out/full_sft_{hidden_size}.pth</code> — full SFT weights.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="lora">
+<div class="card">
+  <div class="card-header"><h2>train_lora.py</h2><span class="badge badge-extra">LoRA</span></div>
+  <div class="card-body">
+    <h3>Goal</h3>
+    <p>Parameter-efficient fine-tuning. Only trains <strong>low-rank adapters</strong> (matrices A and B) injected into attention projections. Base model is frozen.</p>
+
+    <h3>Architecture</h3>
+    <div class="mermaid-box">
+      <pre class="mermaid" style="background:transparent;">
+graph LR
+    subgraph "Each Square Linear Layer"
+        A["Input x"] --> B["W (frozen)"]
+        A --> C["LoRA.A<br/>(Gaussian init)"]
+        C --> D["LoRA.B<br/>(zero init)"]
+        B --> E["Wx"]
+        D --> F["BAx"]
+        E --> G["Wx + BAx"]
+        F --> G
+    end
+      </pre>
+    </div>
+
+    <h3>LoRA Module (<code>model_lora.py</code>)</h3>
+    <pre><code><span class="token-keyword">class</span> <span class="token-type">LoRA</span>(nn.Module):
+    <span class="token-keyword">def</span> <span class="token-function">__init__</span>(self, in_features, out_features, rank=16):
+        self.A = nn.Linear(in_features, rank, bias=False)  <span class="token-comment"># std=0.02</span>
+        self.B = nn.Linear(rank, out_features, bias=False) <span class="token-comment"># zero init</span>
+
+    <span class="token-keyword">def</span> <span class="token-function">forward</span>(self, x):
+        <span class="token-keyword">return</span> self.B(self.A(x))</code></pre>
+
+    <h3>Forward pass modification</h3>
+    <p><code>apply_lora()</code> monkey-patches every <code>nn.Linear</code> where <code>in_features == out_features</code>:</p>
+    <pre><code><span class="token-keyword">def</span> <span class="token-function">forward_with_lora</span>(x, original_fwd, lora):
+    <span class="token-keyword">return</span> original_fwd(x) + lora(x)</code></pre>
+
+    <h3>Math</h3>
+    <div class="math">h = W₀x + ΔWx = W₀x + BAx &nbsp; where &nbsp; A ∈ ℝ<sup>rank×d</sup>, B ∈ ℝ<sup>d×rank</sup>, rank ≪ d</div>
+
+    <h3>Key Hyperparameters</h3>
+    <table>
+      <tr><th>Param</th><th>Default</th><th>Description</th></tr>
+      <tr><td><code>--lora_name</code></td><td>lora_medical</td><td>LoRA adapter name</td></tr>
+      <tr><td><code>--epochs</code></td><td>10</td><td>More epochs (few params)</td></tr>
+      <tr><td><code>--learning_rate</code></td><td>1e-4</td><td>Higher LR typical for LoRA</td></tr>
+      <tr><td><code>--from_weight</code></td><td>full_sft</td><td>Base model</td></tr>
+      <tr><td><code>--data_path</code></td><td>../dataset/lora_medical.jsonl</td><td>Domain-specific SFT data</td></tr>
+    </table>
+
+    <h3>Output</h3>
+    <p><code>out/lora_{name}_{hidden_size}.pth</code> — only LoRA weights (~300KB).</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="dpo">
+<div class="card">
+  <div class="card-header"><h2>train_dpo.py</h2><span class="badge badge-rl">RLHF</span></div>
+  <div class="card-body">
+    <h3>Goal</h3>
+    <p>Direct Preference Optimization — align the model to prefer chosen responses over rejected ones using a reference model as a KL anchor.</p>
+
+    <h3>Data Format</h3>
+    <div class="data-sample">{ "chosen": [
+  {"role": "user", "content": "解释机器学习"},
+  {"role": "assistant", "content": "Good answer..."}
+],
+  "rejected": [
+  {"role": "user", "content": "解释机器学习"},
+  {"role": "assistant", "content": "Bad answer..."}
+]}</div>
+
+    <h3>Architecture Flow</h3>
+    <div class="mermaid-box">
+      <pre class="mermaid" style="background:transparent;">
+graph LR
+    A["Chosen + Rejected<br/>pairs"] --> B["Concatenate<br/>chosen | rejected"]
+    B --> C["Policy Model<br/>(trainable)"]
+    B --> D["Reference Model<br/>(frozen)"]
+    C --> E["policy_log_probs"]
+    D --> F["ref_log_probs"]
+    E --> G["dpo_loss()"]
+    F --> G
+    G --> H["-log(sigmoid(β * Δ))"]
+      </pre>
+    </div>
+
+    <h3>Loss Function</h3>
+    <pre><code><span class="token-keyword">def</span> <span class="token-function">dpo_loss</span>(ref_log_probs, policy_log_probs, mask, beta):
+    ref = (ref_log_probs * mask).sum(dim=1)
+    pol = (policy_log_probs * mask).sum(dim=1)
+    half = ref.shape[0] // 2
+
+    pi_logratios  = pol[:half] - pol[half:]       <span class="token-comment"># chosen - rejected (policy)</span>
+    ref_logratios = ref[:half] - ref[half:]       <span class="token-comment"># chosen - rejected (ref)</span>
+
+    logits = pi_logratios - ref_logratios
+    <span class="token-keyword">return</span> -F.logsigmoid(beta * logits).mean()</code></pre>
+
+    <h3>Math</h3>
+    <div class="math">ℒ<sub>DPO</sub> = -𝔼<sub>(x,y<sub>w</sub>,y<sub>l</sub>)</sub> [ log σ( β ( log π<sub>θ</sub>(y<sub>w</sub>|x) - log π<sub>θ</sub>(y<sub>l</sub>|x) - (log π<sub>ref</sub>(y<sub>w</sub>|x) - log π<sub>ref</sub>(y<sub>l</sub>|x))) ) ]</div>
+
+    <h3>Key Hyperparameters</h3>
+    <table>
+      <tr><th>Param</th><th>Default</th><th>Description</th></tr>
+      <tr><td><code>--beta</code></td><td>0.15</td><td>Inverse KL temperature</td></tr>
+      <tr><td><code>--learning_rate</code></td><td>4e-8</td><td>Very conservative!</td></tr>
+      <tr><td><code>--batch_size</code></td><td>4</td><td>Pairs of chosen+rejected</td></tr>
+      <tr><td><code>--max_seq_len</code></td><td>1024</td><td>Longer context</td></tr>
+    </table>
+
+    <h3>Output</h3>
+    <p><code>out/dpo_{hidden_size}.pth</code> — updated policy weights.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="ppo">
+<div class="card">
+  <div class="card-header"><h2>train_ppo.py</h2><span class="badge badge-rl">RLAIF</span></div>
+  <div class="card-body">
+    <h3>Goal</h3>
+    <p>Proximal Policy Optimization with a separate Actor, Critic, Reference model, and external Reward Model.</p>
+
+    <h3>Architecture</h3>
+    <div class="mermaid-box">
+      <pre class="mermaid" style="background:transparent;">
+graph TD
+    P["Prompt"] --> A["Actor (policy)<br/>generates response"]
+    A --> R["Reward Model<br/>+ heuristic rewards"]
+    A --> C["Critic (value)<br/>estimates value"]
+    A --> Ref["Reference Model<br/>KL anchor"]
+    R --> GAE["GAE<br/>advantages"]
+    C --> GAE
+    GAE --> U["PPO Update<br/>clipped surrogate + KL"]
+    U --> A
+      </pre>
+    </div>
+
+    <h3>Critic Model</h3>
+    <pre><code><span class="token-keyword">class</span> <span class="token-type">CriticModel</span>(MiniMindForCausalLM):
+    <span class="token-keyword">def</span> <span class="token-function">__init__</span>(self, params):
+        <span class="token-builtin">super</span>().<span class="token-function">__init__</span>(params)
+        self.value_head = nn.Linear(params.hidden_size, 1)  <span class="token-comment"># replaces lm_head</span>
+
+    <span class="token-keyword">def</span> <span class="token-function">forward</span>(self, input_ids, attention_mask=None):
+        outputs = self.model(input_ids, attention_mask=attention_mask)
+        hidden = self.model.norm(outputs[0])
+        <span class="token-keyword">return</span> self.value_head(hidden).squeeze(-1)  <span class="token-comment"># per-token values</span></code></pre>
+
+    <h3>GAE Advantage Calculation</h3>
+    <pre><code>lastgaelam = <span class="token-number">0</span>
+advs_rev = []
+<span class="token-keyword">for</span> t <span class="token-keyword">in</span> <span class="token-builtin">reversed</span>(range(gen_len)):
+    nv = values[:, t+<span class="token-number">1</span>] <span class="token-keyword">if</span> t < gen_len-<span class="token-number">1</span> <span class="token-keyword">else</span> <span class="token-number">0</span>
+    delta = rewards[:, t] + gamma * nv - values[:, t]
+    lastgaelam = delta + gamma * lam * lastgaelam
+    advs_rev.append(lastgaelam)
+advantages = torch.stack(advs_rev[::-<span class="token-number">1</span>], dim=<span class="token-number">1</span>)
+returns = advantages + values</code></pre>
+
+    <h3>Actor Loss (clipped surrogate + KL penalty)</h3>
+    <pre><code>ratio = torch.exp(log_ratio)
+
+<span class="token-comment"># KL penalty: exp(kl) - kl - 1</span>
+kl_penalty = ((torch.exp(ref_logp - logp) - (ref_logp - logp) - <span class="token-number">1.0</span>)
+              * mask).<span class="token-builtin">sum</span>() / mask.<span class="token-builtin">sum</span>().clamp(min=<span class="token-number">1</span>)
+
+policy_loss = (torch.<span class="token-builtin">max</span>(
+    -adv * ratio,
+    -adv * torch.clamp(ratio, <span class="token-number">1.0</span>-ε, <span class="token-number">1.0</span>+ε)
+) * mask).<span class="token-builtin">sum</span>() / mask.<span class="token-builtin">sum</span>().clamp(min=<span class="token-number">1</span>) + kl_coef * kl_penalty</code></pre>
+
+    <h3>Value Loss (clipped MSE)</h3>
+    <pre><code>value_loss = <span class="token-number">0.5</span> * (torch.<span class="token-builtin">max</span>(
+    (V - returns) ** <span class="token-number">2</span>,
+    (clip(V, old_V-ε, old_V+ε) - returns) ** <span class="token-number">2</span>
+) * mask).<span class="token-builtin">sum</span>() / mask.<span class="token-builtin">sum</span>().clamp(min=<span class="token-number">1</span>)</code></pre>
+
+    <h3>Math</h3>
+    <div class="math">ℒ<sup>PPO</sup>(θ) = -𝔼[min(r<sub>t</sub>(θ)Â<sub>t</sub>, clip(r<sub>t</sub>(θ), 1-ε, 1+ε)Â<sub>t</sub>)] + β · KL(π<sub>ref</sub> ‖ π<sub>θ</sub>)
+<br/>ℒ<sup>VF</sup>(ψ) = ½𝔼[max((V<sub>ψ</sub> - R<sub>t</sub>)², (clip(V<sub>ψ</sub>, V<sub>old</sub>±ε) - R<sub>t</sub>)²)]</div>
+
+    <h3>Key Hyperparameters</h3>
+    <table>
+      <tr><th>Param</th><th>Default</th><th>Description</th></tr>
+      <tr><td><code>--clip_epsilon</code></td><td>0.2</td><td>PPO clip range</td></tr>
+      <tr><td><code>--vf_coef</code></td><td>0.5</td><td>Value loss weight</td></tr>
+      <tr><td><code>--kl_coef</code></td><td>0.02</td><td>KL penalty weight</td></tr>
+      <tr><td><code>--gamma</code></td><td>1.0</td><td>GAE discount</td></tr>
+      <tr><td><code>--lam</code></td><td>0.95</td><td>GAE lambda</td></tr>
+      <tr><td><code>--learning_rate</code></td><td>3e-7</td><td>Actor LR (very small)</td></tr>
+      <tr><td><code>--critic_learning_rate</code></td><td>5e-7</td><td>Critic LR</td></tr>
+      <tr><td><code>--early_stop_kl</code></td><td>0.25</td><td>Early stop threshold</td></tr>
+      <tr><td><code>--thinking_ratio</code></td><td>0.9</td><td>Probability of &lt;think&gt; tags</td></tr>
+    </table>
+
+    <h3>Output</h3>
+    <p><code>out/ppo_actor_{hidden_size}.pth</code> — actor weights. Resume checkpoint also saves critic + optimizers.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="grpo">
+<div class="card">
+  <div class="card-header"><h2>train_grpo.py</h2><span class="badge badge-rl">RLAIF</span></div>
+  <div class="card-body">
+    <h3>Goal</h3>
+    <p>Group Relative Policy Optimization — PPO without a critic network. Group-normalized advantages from <code>num_generations</code> samples per prompt.</p>
+
+    <h3>Architecture</h3>
+    <div class="mermaid-box">
+      <pre class="mermaid" style="background:transparent;">
+graph TD
+    P["Prompt"] --> Gen["Generate N samples<br/>per prompt"]
+    Gen --> RM["Reward Model<br/>+ heuristic"]
+    Gen --> Ref["Reference Model<br/>KL anchor"]
+    RM --> GA["Group Advantage<br/>adv = (r - μ)/σ"]
+    GA --> L["GRPO/CISPO Loss"]
+    Ref --> L
+    L --> U["Policy Update"]
+      </pre>
+    </div>
+
+    <h3>Group Advantage Calculation</h3>
+    <pre><code>grouped = rewards.view(-<span class="token-number">1</span>, num_generations)   <span class="token-comment"># [B, num_gen]</span>
+mean_r = grouped.<span class="token-builtin">mean</span>(dim=<span class="token-number">1</span>).repeat_interleave(num_generations)
+std_r  = grouped.<span class="token-builtin">std</span>(dim=<span class="token-number">1</span>, unbiased=<span class="token-keyword">False</span>).repeat_interleave(num_generations)
+advantages = (rewards - mean_r) / (std_r + <span class="token-number">1e-4</span>)</code></pre>
+
+    <h3>Loss — Two Variants</h3>
+    <pre><code>kl_div = ref_logps - logps
+per_token_kl = torch.exp(kl_div) - kl_div - <span class="token-number">1</span>
+ratio = torch.exp(logps - old_logps)
+
+<span class="token-comment"># ---- CISPO variant ----</span>
+clamped_ratio = torch.clamp(ratio, <span class="token-builtin">max</span>=epsilon_high).detach()
+per_token_loss = -(clamped_ratio * adv.unsqueeze(<span class="token-number">1</span>) * logps - beta * per_token_kl)
+
+<span class="token-comment"># ---- GRPO variant (standard PPO-style) ----</span>
+clipped_ratio = torch.clamp(ratio, <span class="token-number">1</span>-ε, <span class="token-number">1</span>+ε)
+loss1 = ratio * adv.unsqueeze(<span class="token-number">1</span>)
+loss2 = clipped_ratio * adv.unsqueeze(<span class="token-number">1</span>)
+per_token_loss = -(torch.<span class="token-builtin">min</span>(loss1, loss2) - beta * per_token_kl)</code></pre>
+
+    <h3>Math</h3>
+    <div class="math">Â<sub>i</sub> = (r<sub>i</sub> - μ<sub>group</sub>) / σ<sub>group</sub>
+<br/><br/>ℒ<sub>GRPO</sub> = -𝔼[min(r(θ)Â, clip(r(θ), 1-ε, 1+ε)Â)] + β · KL(π<sub>ref</sub> ‖ π<sub>θ</sub>)
+<br/>ℒ<sub>CISPO</sub> = -𝔼[min(r(θ), ε<sub>high</sub>) · Â · log π<sub>θ</sub>] + β · KL(π<sub>ref</sub> ‖ π<sub>θ</sub>)</div>
+
+    <h3>Key Hyperparameters</h3>
+    <table>
+      <tr><th>Param</th><th>Default</th><th>Description</th></tr>
+      <tr><td><code>--num_generations</code></td><td>6</td><td>Samples per prompt</td></tr>
+      <tr><td><code>--loss_type</code></td><td>cispo</td><td>grpo or cispo</td></tr>
+      <tr><td><code>--epsilon</code></td><td>0.2</td><td>Clip range</td></tr>
+      <tr><td><code>--epsilon_high</code></td><td>5.0</td><td>CISPO upper clamp</td></tr>
+      <tr><td><code>--beta</code></td><td>0.1</td><td>KL penalty</td></tr>
+      <tr><td><code>--learning_rate</code></td><td>3e-7</td><td>Policy LR</td></tr>
+    </table>
+
+    <h3>Output</h3>
+    <p><code>out/grpo_{hidden_size}.pth</code> — updated policy weights.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="agent">
+<div class="card">
+  <div class="card-header"><h2>train_agent.py</h2><span class="badge badge-rl">Agentic RL</span></div>
+  <div class="card-body">
+    <h3>Goal</h3>
+    <p>Multi-turn tool-use training via RL. The agent calls tools (<code>&lt;tool_call&gt;</code> tags), gets results, and continues — all within a GRPO/CISPO loss framework.</p>
+
+    <h3>Data Format</h3>
+    <div class="data-sample">{ "conversations": [
+  {"role": "system", "content": "# Tools\n\nYou have access to...", "tools": "[{\"type\":\"function\",\"function\":{\"name\":\"calculate_math\",...}}]"},
+  {"role": "user", "content": "帮我算一下256*37"},
+  {"role": "assistant", "content": "", "tool_calls": "[{\"name\":\"calculate_math\",\"arguments\":{\"expression\":\"256*37\"}}]"},
+  {"role": "tool", "content": "{\"result\":\"9472\"}"},
+  {"role": "assistant", "content": "结果是9472。"}
+], "gt": ["9472"]}</div>
+
+    <h3>Reward Calculation</h3>
+    <p>Composite reward with multiple signals:</p>
+    <pre><code><span class="token-keyword">def</span> <span class="token-function">calculate_rewards</span>(responses, gt_batch, reward_model, ...):
+    <span class="token-comment"># No tool calls → length + thinking + RM score + repetition</span>
+    <span class="token-comment"># With tool calls → tool alignment + GT verification + RM + repetition</span>
+
+    <span class="token-comment"># Tool alignment: how many tool calls match valid tool definitions</span>
+    tool_gap = |valid_calls| - |gt| + excess_invalid
+
+    <span class="token-comment"># GT verification: what fraction of expected answers appear in text</span>
+    verified = validate_gt_in_text(response, ground_truth)
+    gt_score = <span class="token-number">2.5</span> * |verified| / |gt|
+
+    <span class="token-comment"># Final clipped to [-3, 3]</span>
+    reward = <span class="token-builtin">min</span>(<span class="token-builtin">max</span>(reward, -<span class="token-number">3.0</span>), <span class="token-number">3.0</span>)</code></pre>
+
+    <h3>Multi-turn Rollout</h3>
+    <pre><code><span class="token-keyword">def</span> <span class="token-function">rollout_single</span>(engine, tokenizer, messages, tools, max_turns=<span class="token-number">3</span>):
+    <span class="token-keyword">for</span> turn <span class="token-keyword">in</span> <span class="token-builtin">range</span>(max_turns):
+        context = tokenizer.apply_chat_template(messages, tools=tools, ...)
+        result = engine.rollout(context, ...)
+        calls = parse_tool_calls(result.text)
+        <span class="token-keyword">if</span> <span class="token-keyword">not</span> calls: <span class="token-keyword">break</span>
+        <span class="token-keyword">for</span> call <span class="token-keyword">in</span> calls:
+            result = execute_tool(call[<span class="token-string">"name"</span>], call[<span class="token-string">"arguments"</span>])
+            messages.append({<span class="token-string">"role"</span>: <span class="token-string">"tool"</span>, <span class="token-string">"content"</span>: json.dumps(result)})</code></pre>
+
+    <h3>Loss</h3>
+    <p>Identical to <code>train_grpo.py</code> — same CISPO/GRPO loss with group-normalized advantages.</p>
+
+    <h3>Key Hyperparameters</h3>
+    <table>
+      <tr><th>Param</th><th>Default</th><th>Description</th></tr>
+      <tr><td><code>--max_gen_len</code></td><td>768</td><td>Per-turn max tokens</td></tr>
+      <tr><td><code>--max_total_len</code></td><td>2500</td><td>Total sequence cap</td></tr>
+      <tr><td><code>--num_generations</code></td><td>4</td><td>Per prompt</td></tr>
+      <tr><td><code>--thinking_ratio</code></td><td>0.1</td><td>Low — tool use conflicts with thinking</td></tr>
+      <tr><td><code>--beta</code></td><td>0.1</td><td>KL penalty</td></tr>
+    </table>
+
+    <h3>Output</h3>
+    <p><code>out/agent_{hidden_size}.pth</code>.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="distill">
+<div class="card">
+  <div class="card-header"><h2>train_distillation.py</h2><span class="badge badge-extra">Distillation</span></div>
+  <div class="card-body">
+    <h3>Goal</h3>
+    <p>Knowledge Distillation: train a smaller student model to match both the ground-truth labels and the softened output distribution of a larger teacher model.</p>
+
+    <h3>Architecture</h3>
+    <div class="mermaid-box">
+      <pre class="mermaid" style="background:transparent;">
+graph TD
+    X["Input tokens"] --> S["Student Model<br/>(trainable)"]
+    X --> T["Teacher Model<br/>(frozen)"]
+    S --> CE["Cross-Entropy<br/>vs ground-truth"]
+    T --> KL["KL Divergence<br/>(softened)"]
+    S --> KL
+    CE --> L["α·CE + (1-α)·KL"]
+    KL --> L
+      </pre>
+    </div>
+
+    <h3>Distillation Loss</h3>
+    <pre><code><span class="token-keyword">def</span> <span class="token-function">distillation_loss</span>(student_logits, teacher_logits, temperature=<span class="token-number">1.0</span>):
+    <span class="token-keyword">with</span> torch.no_grad():
+        teacher_probs = F.softmax(teacher_logits / temperature, dim=-<span class="token-number">1</span>)
+
+    student_log_probs = F.log_softmax(student_logits / temperature, dim=-<span class="token-number">1</span>)
+    kl = F.kl_div(student_log_probs, teacher_probs, reduction=<span class="token-string">'batchmean'</span>)
+    <span class="token-keyword">return</span> (temperature ** <span class="token-number">2</span>) * kl</code></pre>
+
+    <h3>Total Loss</h3>
+    <pre><code><span class="token-comment"># CE on assistant tokens only</span>
+ce_loss = F.cross_entropy(student_logits, shift_labels, ignore_index=-<span class="token-number">100</span>)
+
+<span class="token-comment"># KL on assistant tokens only</span>
+distill_loss = distillation_loss(student_logits[mask], teacher_logits[mask], temp)
+
+<span class="token-comment"># Combined</span>
+loss = α * ce_loss + (<span class="token-number">1</span> - α) * distill_loss</code></pre>
+
+    <h3>Math</h3>
+    <div class="math">ℒ = α · CE(y, π<sub>S</sub>) + (1-α) · T² · KL(softmax(π<sub>T</sub>/T) ‖ softmax(π<sub>S</sub>/T))</div>
+
+    <h3>Key Hyperparameters</h3>
+    <table>
+      <tr><th>Param</th><th>Default</th><th>Description</th></tr>
+      <tr><td><code>--alpha</code></td><td>0.5</td><td>CE weight</td></tr>
+      <tr><td><code>--temperature</code></td><td>1.5</td><td>Softmax temperature</td></tr>
+      <tr><td><code>--student_hidden_size</code></td><td>768</td><td>Student dim</td></tr>
+      <tr><td><code>--teacher_hidden_size</code></td><td>768</td><td>Teacher dim</td></tr>
+      <tr><td><code>--teacher_use_moe</code></td><td>1</td><td>Teacher can be MoE</td></tr>
+      <tr><td><code>--epochs</code></td><td>6</td><td>More epochs</td></tr>
+    </table>
+
+    <h3>Output</h3>
+    <p><code>out/full_dist_{student_hidden_size}.pth</code> — student weights.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="tokenizer">
+<div class="card">
+  <div class="card-header"><h2>train_tokenizer.py</h2><span class="badge badge-extra">Tokenizer</span></div>
+  <div class="card-body">
+    <h3>Goal</h3>
+    <p>Train a BPE tokenizer from scratch with 6400 vocabulary size and 36 special tokens.</p>
+
+    <h3>Special Tokens</h3>
+    <pre><code><span class="token-comment"># Chat markers (3)</span>
+&lt;|endoftext|&gt;  &lt;|im_start|&gt;  &lt;|im_end|&gt;
+
+<span class="token-comment"># Vision/Audio (13)</span>
+&lt;|object_ref_start|&gt;  &lt;|vision_start|&gt;  &lt;|audio_start|&gt;  ...
+
+<span class="token-comment"># Tool Calling (4)</span>
+&lt;tool_call&gt;  &lt;/tool_call&gt;  &lt;tool_response&gt;  &lt;/tool_response&gt;
+
+<span class="token-comment"># Thinking (2)</span>
+&lt;think&gt;  &lt;/think&gt;
+
+<span class="token-comment"># Buffer slots for future use</span>
+&lt;|buffer_1|&gt; ... &lt;|buffer_N|&gt;</code></pre>
+
+    <h3>Configuration</h3>
+    <table>
+      <tr><th>Param</th><th>Value</th></tr>
+      <tr><td><code>VOCAB_SIZE</code></td><td>6400</td></tr>
+      <tr><td><code>SPECIAL_TOKENS_NUM</code></td><td>36</td></tr>
+      <tr><td><code>bos_token</code></td><td><code>&lt;|im_start|&gt;</code></td></tr>
+      <tr><td><code>eos_token</code></td><td><code>&lt;|im_end|&gt;</code></td></tr>
+      <tr><td><code>pad_token</code></td><td><code>&lt;|endoftext|&gt;</code></td></tr>
+      <tr><td><code>model_max_length</code></td><td>131072</td></tr>
+    </table>
+
+    <h3>Training Data</h3>
+    <p>Reads first 10,000 lines from <code>sft_t2t_mini.jsonl</code>, extracts all <code>content</code> fields from conversations.</p>
+
+    <h3>Output</h3>
+    <p><code>model_learn_tokenizer/tokenizer.json</code> + <code>tokenizer_config.json</code> with HuggingFace-compatible chat template.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="rollout">
+<div class="card">
+  <div class="card-header"><h2>rollout_engine.py</h2><span class="badge badge-rl">Engine</span></div>
+  <div class="card-body">
+    <h3>Goal</h3>
+    <p>Decoupled generation backends for RL training. Supports two engines with the same interface.</p>
+
+    <h3>RolloutResult Dataclass</h3>
+    <pre><code>@dataclass
+<span class="token-keyword">class</span> <span class="token-type">RolloutResult</span>:
+    output_ids: Tensor         <span class="token-comment"># [B*num_gen, P+R]  full prompt + completion tokens</span>
+    completion_ids: Tensor      <span class="token-comment"># [B*num_gen, R]   generated completion only</span>
+    per_token_logps: Tensor     <span class="token-comment"># [B*num_gen, R]   log-probability per generated token</span>
+    completions: List[str]      <span class="token-comment"># decoded text of completions</span>
+    prompt_lens: Tensor         <span class="token-comment"># [B*num_gen]      length of each prompt</span>
+    completion_mask: Tensor     <span class="token-comment"># [B*num_gen, R]   binary mask for completions</span></code></pre>
+
+    <h3>Engine Comparison</h3>
+    <table>
+      <tr><th>Feature</th><th>TorchRolloutEngine</th><th>SGLangRolloutEngine</th></tr>
+      <tr><td>Backend</td><td>Direct PyTorch <code>model.generate()</code></td><td>HTTP requests to SGLang server</td></tr>
+      <tr><td>Speed</td><td>Slower (native PyTorch)</td><td>Faster (optimized inference engine)</td></tr>
+      <tr><td>Logprobs</td><td>Via <code>compute_per_token_logps()</code></td><td>Returned by SGLang API</td></tr>
+      <tr><td>Policy update</td><td>In-place model swap</td><td>Serializes weights → HTTP POST to server</td></tr>
+    </table>
+
+    <h3>Factory</h3>
+    <pre><code><span class="token-keyword">def</span> <span class="token-function">create_rollout_engine</span>(engine_type, policy_model, tokenizer, device, ...):
+    <span class="token-keyword">if</span> engine_type == <span class="token-string">"torch"</span>: <span class="token-keyword">return</span> TorchRolloutEngine(...)
+    <span class="token-keyword">elif</span> engine_type == <span class="token-string">"sglang"</span>: <span class="token-keyword">return</span> SGLangRolloutEngine(...)</code></pre>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="utils">
+<div class="card">
+  <div class="card-header"><h2>trainer_utils.py</h2><span class="badge badge-core">Utils</span></div>
+  <div class="card-body">
+    <p>Shared utility functions used across all training scripts:</p>
+    <div class="utils-grid">
+      <div class="utils-card">
+        <div class="fn">setup_seed(seed)</div>
+        <div class="desc">Sets random, numpy, torch, cuda seeds + deterministic cuDNN.</div>
+      </div>
+      <div class="utils-card">
+        <div class="fn">get_lr(step, total, lr)</div>
+        <div class="desc">Cosine decay: <code>lr × (0.1 + 0.45 × (1 + cos(π·step/total)))</code></div>
+      </div>
+      <div class="utils-card">
+        <div class="fn">get_model_params(model, config)</div>
+        <div class="desc">Prints total params and active params (MoE-aware) in millions.</div>
+      </div>
+      <div class="utils-card">
+        <div class="fn">init_distributed_mode()</div>
+        <div class="desc">Initializes NCCL/DDP from env vars (<code>RANK</code>, <code>WORLD_SIZE</code>).</div>
+      </div>
+      <div class="utils-card">
+        <div class="fn">lm_checkpoint(args..., **kwargs)</div>
+        <div class="desc">Dual-purpose: saves half-precision weights + full resume checkpoint (model, optimizer, scheduler, wandb_id). Handles DDP unwrapping and cross-GPU-count resumption.</div>
+      </div>
+      <div class="utils-card">
+        <div class="fn">init_model(config, from_weight, tokenizer_path, save_dir, device)</div>
+        <div class="desc">Loads tokenizer, creates MiniMind model, loads .pth weights if specified.</div>
+      </div>
+      <div class="utils-card">
+        <div class="fn">SkipBatchSampler(sampler, batch_size, skip_batches)</div>
+        <div class="desc">Skips N batches for resume support. Compatible with DistributedSampler.</div>
+      </div>
+      <div class="utils-card">
+        <div class="fn">LMForRewardModel(model_path, device, dtype)</div>
+        <div class="desc">Wraps external HF model as a reward model (calls <code>model.get_score()</code>). Used by PPO/GRPO/Agent.</div>
+      </div>
+      <div class="utils-card">
+        <div class="fn">Logger(content)</div>
+        <div class="desc">Prints only on main process (rank 0) in DDP mode.</div>
+      </div>
+      <div class="utils-card">
+        <div class="fn">is_main_process()</div>
+        <div class="desc">True if rank 0 or non-distributed.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="datasets">
+<div class="card">
+  <div class="card-header"><h2>Datasets (lm_dataset.py)</h2><span class="badge badge-core">Data</span></div>
+  <div class="card-body">
+    <h3>PretrainDataset</h3>
+    <p>Loads JSONL with <code>{"text": "..."}</code>. Tokenizes with BOS+EOS, pads to max_length. Labels = input_ids with padding masked to -100.</p>
+
+    <h3>SFTDataset</h3>
+    <p>Loads JSONL with <code>{"conversations": [...]}</code>. Key features:</p>
+    <ul>
+      <li><code>create_chat_prompt()</code> — uses <code>tokenizer.apply_chat_template()</code> with tools support</li>
+      <li><code>generate_labels()</code> — masks everything before <code>assistant\n</code> response as -100</li>
+      <li><code>pre_processing_chat()</code> — 20% chance to add random system prompt</li>
+      <li><code>post_processing_chat()</code> — 80% chance to strip empty <code>&lt;think&gt;</code> tags</li>
+      <li>Supports <code>tool_calls</code> and <code>reasoning_content</code> fields</li>
+    </ul>
+
+    <h3>DPODataset</h3>
+    <p>Loads JSONL with <code>{"chosen": [...], "rejected": [...]}</code>. Returns dict with <code>x_chosen</code>, <code>y_chosen</code>, <code>mask_chosen</code>, <code>x_rejected</code>, <code>y_rejected</code>, <code>mask_rejected</code>.</p>
+
+    <h3>RLAIFDataset</h3>
+    <p>Loads JSONL with <code>{"conversations": [...]}</code>. Returns <code>{"prompt": str, "answer": ""}</code> with optional thinking tags based on <code>thinking_ratio</code>.</p>
+
+    <h3>AgentRLDataset</h3>
+    <p>Loads JSONL with <code>{"conversations": [...], "gt": [...]}</code>. Extracts multi-turn messages, parses tools from system messages, returns <code>{"messages": [...], "tools": {...}, "gt": [...]}</code>.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="lora-impl">
+<div class="card">
+  <div class="card-header"><h2>LoRA Implementation (model_lora.py)</h2><span class="badge badge-extra">LoRA</span></div>
+  <div class="card-body">
+    <h3>Key Functions</h3>
+    <pre><code><span class="token-keyword">def</span> <span class="token-function">apply_lora</span>(model, rank=<span class="token-number">16</span>):
+    <span class="token-comment"># For every nn.Linear where in_features == out_features:</span>
+    <span class="token-comment"># 1. Create LoRA submodule (A Gaussian, B zero)</span>
+    <span class="token-comment"># 2. Monkey-patch forward = original_forward(x) + lora(x)</span>
+
+<span class="token-keyword">def</span> <span class="token-function">load_lora</span>(model, path):
+    <span class="token-comment"># Load LoRA state dict, match by module.lora.A.weight / .B.weight</span>
+
+<span class="token-keyword">def</span> <span class="token-function">save_lora</span>(model, path):
+    <span class="token-comment"># Collect all .lora. parameters, save to .pth</span>
+
+<span class="token-keyword">def</span> <span class="token-function">merge_lora</span>(model, lora_path, save_path):
+    <span class="token-comment"># Load LoRA, merge into base: W_merged = W_base + B @ A</span>
+    <span class="token-comment"># Save merged (non-LoRA) state dict</span></code></pre>
+
+    <h3>Math</h3>
+    <div class="math">W<sub>merged</sub> = W<sub>base</sub> + B · A</div>
+    <p style="text-align:center;color:var(--text-dim);font-size:0.85rem;">During training: h = W<sub>base</sub>x + BAx. After merge: h = (W<sub>base</sub> + BA)x</p>
+  </div>
+</div>
+</section>
+
+</div>
+<script>
+mermaid.initialize({ theme: 'neutral', startOnLoad: true });
+</script>
+</body>
+</html>
