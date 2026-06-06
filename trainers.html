@@ -535,9 +535,10 @@ loss = loss / args.accumulation_steps</code></pre>
     <div style="margin:16px 0"><img src="./images/pretrain_loss.jpg" alt="Pretrain Loss Curve" style="max-width:100%;border-radius:var(--radius);border:1px solid var(--border)"></div>
     <div style="font-size:0.85rem;color:var(--text-muted);background:var(--surface2);padding:12px 16px;border-radius:var(--radius);border-left:3px solid var(--accent);margin-bottom:12px;">
       <strong style="color:var(--text);">Graph Explanation:</strong><br>
-      • <strong>X-axis (Step):</strong> The number of training steps (batches) processed.<br>
-      • <strong>Y-axis (Loss):</strong> The Cross-Entropy Loss value.<br>
-      • <strong>Trend:</strong> The line shows the model's error rate decreasing as it learns to predict the next token. A steep initial drop means it quickly learns basic vocabulary, followed by a long tail where it learns complex grammar and facts. Smoothness here indicates a stable learning rate.
+      This dashboard shows <strong>three panels</strong> for two runs: standard (<code>minimind-3-pretrain</code>) and MoE (<code>minimind-3-moe-pretrain</code>).<br>
+      • <strong>logits_loss:</strong> Cross-entropy loss on token predictions. Both runs start high (~8), drop sharply in the first few hundred steps, and gradually converge around 1.7–2.0 by step 1.6k. The MoE model slightly outperforms the dense model in final loss.<br>
+      • <strong>aux_loss:</strong> MoE load-balancing auxiliary loss. Only the MoE run has a nonzero value (~0.004–0.006), staying roughly constant throughout training — confirming the standard model has no MoE head.<br>
+      • <strong>learning_rate:</strong> Shows the cosine annealing schedule decaying from the peak (~1e-4) toward near-zero by the end of training. Only the MoE run is visible because the standard run used a different configuration.
     </div>
   </div>
 </div>
@@ -657,9 +658,10 @@ labels[j] = input_ids[j]  <span class="tk-c"># only for assistant response token
     <div style="margin:16px 0"><img src="./images/sft_loss.jpg" alt="SFT Loss Curve" style="max-width:100%;border-radius:var(--radius);border:1px solid var(--border)"></div>
     <div style="font-size:0.85rem;color:var(--text-muted);background:var(--surface2);padding:12px 16px;border-radius:var(--radius);border-left:3px solid var(--green);margin-bottom:12px;">
       <strong style="color:var(--text);">Graph Explanation:</strong><br>
-      • <strong>X-axis (Step):</strong> Training steps over the fine-tuning dataset.<br>
-      • <strong>Y-axis (Loss):</strong> Masked Cross-Entropy Loss (only assistant tokens).<br>
-      • <strong>Trend:</strong> Unlike pretraining, this curve starts much lower and drops very fast because the model already knows language. It is simply learning the "format" of being a helpful assistant (e.g., starting answers with "Sure, here is...").
+      This dashboard shows <strong>three panels</strong> comparing the dense (<code>minimind-3-sft</code>) and MoE (<code>minimind-3-moe-sft</code>) fine-tuning runs.<br>
+      • <strong>loss (total):</strong> The combined training loss (CE + MoE aux). Both runs start around 1.5–2.0 and show a slow, noisy downward trend over ~1.2k steps — unlike pretraining, the loss is already relatively low because the base model has language knowledge. High step-to-step variance is expected since only assistant tokens are supervised.<br>
+      • <strong>logits_loss:</strong> The masked cross-entropy on assistant-only tokens. Mirrors the total loss curve — noisy but with a gradual declining trend, finishing around 1.2–1.5.<br>
+      • <strong>aux_loss:</strong> MoE auxiliary load-balancing loss. Only the MoE run is nonzero (~0.004), confirming expert routing is active. The dense run remains at 0 throughout.
     </div>
   </div>
 </div>
@@ -1010,9 +1012,13 @@ flowchart LR
     <div style="margin:16px 0"><img src="./images/ppo_loss.jpg" alt="PPO Loss Curve" style="max-width:100%;border-radius:var(--radius);border:1px solid var(--border)"></div>
     <div style="font-size:0.85rem;color:var(--text-muted);background:var(--surface2);padding:12px 16px;border-radius:var(--radius);border-left:3px solid var(--orange);margin-bottom:12px;">
       <strong style="color:var(--text);">Graph Explanation:</strong><br>
-      • <strong>X-axis (Step):</strong> PPO rollout & update steps.<br>
-      • <strong>Y-axis (Values):</strong> A composite of multiple metrics. Typically, <em>Actor Loss</em> oscillates near zero, <em>Critic Loss</em> drops as the value network gets better at predicting rewards, and <em>Reward</em> climbs upwards.<br>
-      • <strong>Trend:</strong> You will see the total Reward line steadily increasing as the model learns to generate answers that the Reward Model prefers. If KL divergence shoots up rapidly, the model is "hacking" the reward and losing text quality.
+      This dashboard shows <strong>six panels</strong> comparing dense (<code>minimind-3</code>) and MoE (<code>minimind-3-moe</code>) PPO runs over ~8k steps.<br>
+      � <strong>reward:</strong> Composite reward score (range −3 to +3). Both runs start noisy near 0 and gradually trend positive, reaching ~+2.5 by the end — confirming the policy learns to produce more preferred responses.<br>
+      � <strong>avg_response_len:</strong> Average tokens generated per response. High variance (0–1200 tokens) across steps, reflecting the model exploring different response lengths during RL.<br>
+      � <strong>critic_loss:</strong> Clipped MSE loss of the value network. Starts high (~3), drops sharply within the first few hundred steps and stays near 0 — the Critic quickly learns to predict returns.<br>
+      � <strong>actor_lr:</strong> Actor learning rate following a cosine annealing schedule, decaying from ~6e-7 toward 0 over training.<br>
+      � <strong>kl_ref:</strong> KL divergence from the reference model. The MoE run shows a massive early spike (~120k), then drops to near 0 — the dense run stays near 0 throughout, confirming the KL penalty is working.<br>
+      � <strong>approx_kl:</strong> Approximate per-step KL (used for early stopping). Both runs stay small (&lt;2.5), confirming the clipping mechanism is controlling policy drift effectively.
     </div>
   </div>
 </div>
@@ -1136,9 +1142,13 @@ per_token_loss = -(torch.<span class="tk-bi">min</span>(ratio * adv.unsqueeze(<s
     <div style="margin:16px 0"><img src="./images/grpo_loss.jpg" alt="GRPO Loss Curve" style="max-width:100%;border-radius:var(--radius);border:1px solid var(--border)"></div>
     <div style="font-size:0.85rem;color:var(--text-muted);background:var(--surface2);padding:12px 16px;border-radius:var(--radius);border-left:3px solid var(--orange);margin-bottom:12px;">
       <strong style="color:var(--text);">Graph Explanation:</strong><br>
-      • <strong>X-axis (Step):</strong> GRPO training iterations.<br>
-      • <strong>Y-axis (Values):</strong> Group-normalized advantages and surrogate policy loss.<br>
-      • <strong>Trend:</strong> Because there is no Critic network, the loss curve is purely driven by the policy's log-probabilities scaled by the relative advantage of responses in a group. A healthy graph shows the average reward score of the group rising smoothly without the KL divergence penalty overwhelming the objective.
+      This dashboard shows <strong>six panels</strong> comparing dense (<code>minimind-3</code>) and MoE (<code>minimind-3-moe</code>) GRPO runs over ~10k–20k steps.<br>
+      • <strong>reward:</strong> Group-averaged composite reward (range ~−3 to +6). Both runs start near 0 with high noise, showing a very slow upward trend. Unlike PPO, there is no critic to stabilize the signal, so progress is gradual and noisy.<br>
+      • <strong>avg_response_len:</strong> Average generated response length, highly variable (0–1200 tokens). The wide variance reflects the policy exploring different response strategies within each group of N generations.<br>
+      • <strong>learning_rate:</strong> Cosine annealing schedule for the policy LR, decaying from ~6e-7 to near 0 — the MoE run decays faster due to different epoch counts.<br>
+      • <strong>advantages_mean:</strong> Mean of group-normalized advantages across the batch. Stays very close to 0 by design — group normalization (subtract group mean) guarantees this, confirming correct implementation.<br>
+      • <strong>advantages_std:</strong> Standard deviation of normalized advantages, ranging 0.5–0.95. This measures how spread out the reward signal is within each group; values near 1.0 indicate good exploration diversity.<br>
+      • <strong>policy_loss:</strong> The GRPO/CISPO surrogate objective. Negative values (around −50) are expected — the loss is defined as the negative expected advantage weighted by the policy ratio, so improving policies produce increasingly negative values.
     </div>
   </div>
 </div>
@@ -1253,9 +1263,13 @@ flowchart TD
     <div style="margin:16px 0"><img src="./images/agent_rl_loss.jpg" alt="Agent RL Loss Curve" style="max-width:100%;border-radius:var(--radius);border:1px solid var(--border)"></div>
     <div style="font-size:0.85rem;color:var(--text-muted);background:var(--surface2);padding:12px 16px;border-radius:var(--radius);border-left:3px solid var(--purple);margin-bottom:12px;">
       <strong style="color:var(--text);">Graph Explanation:</strong><br>
-      • <strong>X-axis (Step):</strong> Agent training rollouts.<br>
-      • <strong>Y-axis (Score/Loss):</strong> Multi-dimensional rewards (Tool usage correctness, ground truth verification).<br>
-      • <strong>Trend:</strong> Early in the graph, tool syntax errors might be high, causing negative rewards. As training progresses, the model learns the exact JSON syntax for tools (causing a sharp bump in reward), followed by a slower climb as it learns to actually use the tools <em>correctly</em> to find the ground truth answer.
+      This dashboard shows <strong>six panels</strong> comparing dense (<code>minimind-3</code>) and MoE (<code>minimind-3-moe</code>) agent RL runs over ~20k steps.<br>
+      • <strong>reward:</strong> Composite multi-signal reward (tool alignment + GT verification + reward model − repetition penalty, clipped to [−3, +3] but can reach ~+4 for MoE). Starts near 0, gradually trends to ~+1.5–2.0 as the agent learns when and how to call tools.<br>
+      • <strong>kl_ref:</strong> KL divergence from the reference model (computed as log π_ref − log π_θ, so negative values mean the policy has moved away from the reference). Both runs start at 0 and trend increasingly negative (reaching −1.5), showing the agent is diverging from its SFT initialization as it specializes in tool use.<br>
+      • <strong>group_reward_std:</strong> Standard deviation of rewards within each generation group (~0.75–1.5). Persistent nonzero spread indicates the model is still exploring — some rollouts call tools correctly, others fail — which is healthy for continued learning.<br>
+      • <strong>advantages_std:</strong> Spread of group-normalized advantages (~0.5–1.0), confirming active reward differentiation within each prompt group throughout training.<br>
+      • <strong>advantages_mean:</strong> Near 0 throughout (by group-normalization design), with rare spikes confirming correct normalization implementation.<br>
+      • <strong>policy_loss:</strong> The GRPO/CISPO surrogate loss for the agent. Stays close to 0 with occasional sharp spikes (up to +400 for MoE), which correspond to rare high-advantage rollouts causing large gradient updates.
     </div>
   </div>
 </div>
