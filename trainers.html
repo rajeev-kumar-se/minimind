@@ -168,8 +168,8 @@ graph LR
 
     <h3>Data Format</h3>
     <p>JSONL with a single <code>"text"</code> field. Loaded via <code>PretrainDataset</code> which appends BOS/EOS tokens and pads to <code>max_seq_len</code> (default 340).</p>
-    <div class="data-sample">{"text": "Transformer通过自注意力机制建模上下文关系，是现代大语言模型的重要基础结构。"}
-{"text": "机器学习是人工智能的核心技术之一，通过算法让计算机从数据中学习规律。"}</div>
+    <div class="data-sample">{"text": "Transformer models context relationships through self-attention mechanisms, and is an important foundational structure for modern large language models."}
+{"text": "Machine learning is one of the core technologies of artificial intelligence, allowing computers to learn patterns from data through algorithms."}</div>
 
     <h3>Architecture Flow</h3>
     <div class="mermaid-box">
@@ -227,9 +227,9 @@ loss = loss / args.accumulation_steps</code></pre>
     <h3>Data Format</h3>
     <p>JSONL with <code>conversations</code> array. Supports multi-turn, tool calls, thinking tags, and system prompts.</p>
     <div class="data-sample">{ "conversations": [
-  {"role": "system", "content": "你是MiniMind，一个乐于助人的AI助手。"},
-  {"role": "user", "content": "解释什么是机器学习"},
-  {"role": "assistant", "content": "机器学习是人工智能的核心技术之一..."}
+  {"role": "system", "content": "You are MiniMind, a helpful AI assistant."},
+  {"role": "user", "content": "Explain what machine learning is"},
+  {"role": "assistant", "content": "Machine learning is one of the core technologies of artificial intelligence..."}
 ]}</div>
 
     <h3>Architecture Flow</h3>
@@ -342,11 +342,11 @@ graph LR
 
     <h3>Data Format</h3>
     <div class="data-sample">{ "chosen": [
-  {"role": "user", "content": "解释机器学习"},
+  {"role": "user", "content": "Explain machine learning"},
   {"role": "assistant", "content": "Good answer..."}
 ],
   "rejected": [
-  {"role": "user", "content": "解释机器学习"},
+  {"role": "user", "content": "Explain machine learning"},
   {"role": "assistant", "content": "Bad answer..."}
 ]}</div>
 
@@ -558,10 +558,10 @@ per_token_loss = -(torch.<span class="token-builtin">min</span>(loss1, loss2) - 
     <h3>Data Format</h3>
     <div class="data-sample">{ "conversations": [
   {"role": "system", "content": "# Tools\n\nYou have access to...", "tools": "[{\"type\":\"function\",\"function\":{\"name\":\"calculate_math\",...}}]"},
-  {"role": "user", "content": "帮我算一下256*37"},
+  {"role": "user", "content": "Help me calculate 256*37"},
   {"role": "assistant", "content": "", "tool_calls": "[{\"name\":\"calculate_math\",\"arguments\":{\"expression\":\"256*37\"}}]"},
   {"role": "tool", "content": "{\"result\":\"9472\"}"},
-  {"role": "assistant", "content": "结果是9472。"}
+  {"role": "assistant", "content": "The result is 9472."}
 ], "gt": ["9472"]}</div>
 
     <h3>Reward Calculation</h3>
