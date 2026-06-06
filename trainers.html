@@ -410,6 +410,9 @@ flowchart TD
       $$\mathcal{L}_{\text{total}} = \underbrace{\alpha\,\mathcal{L}_{\text{supervised}}}_{\text{task loss}} + \underbrace{(1-\alpha)\,\mathcal{L}_{\text{reg}}}_{\text{regularisation}}$$
       <p style="color:var(--text-muted);font-size:.82rem;margin-top:10px;">Where $\mathcal{L}_{\text{reg}}$ is 0 for Pretrain/SFT, a KL penalty for RL stages, and a distillation KL for knowledge transfer.</p>
     </div>
+
+    <h3>Stats & Metrics</h3>
+    <p>Throughout the pipeline, you'll encounter various metrics. Generally, <strong>Loss</strong> represents the error rate (lower is better), <strong>Reward</strong> represents performance on a specific objective (higher is better), and <strong>KL Divergence</strong> measures how much the model's behavior is drifting from a safe baseline (lower is better). Monitoring these ensures stable learning.</p>
   </div>
 </div>
 </section>
@@ -526,6 +529,16 @@ loss = loss / args.accumulation_steps</code></pre>
     </div>
     <h3>Output</h3>
     <p><code>out/pretrain_{hidden_size}.pth</code> — full model weights in half precision. Resume checkpoint saved in <code>checkpoints/</code>.</p>
+
+    <h3>Stats & Metrics</h3>
+    <p>During pretraining, monitor the <strong>Cross-Entropy Loss</strong> curve. It typically starts high, drops sharply in the first few thousand steps, and then follows a steady logarithmic decay. A healthy curve will smoothly decrease and converge. Spikes might indicate learning rate instability or bad data batches.</p>
+    <div style="margin:16px 0"><img src="./images/pretrain_loss.jpg" alt="Pretrain Loss Curve" style="max-width:100%;border-radius:var(--radius);border:1px solid var(--border)"></div>
+    <div style="font-size:0.85rem;color:var(--text-muted);background:var(--surface2);padding:12px 16px;border-radius:var(--radius);border-left:3px solid var(--accent);margin-bottom:12px;">
+      <strong style="color:var(--text);">Graph Explanation:</strong><br>
+      • <strong>X-axis (Step):</strong> The number of training steps (batches) processed.<br>
+      • <strong>Y-axis (Loss):</strong> The Cross-Entropy Loss value.<br>
+      • <strong>Trend:</strong> The line shows the model's error rate decreasing as it learns to predict the next token. A steep initial drop means it quickly learns basic vocabulary, followed by a long tail where it learns complex grammar and facts. Smoothness here indicates a stable learning rate.
+    </div>
   </div>
 </div>
 </section>
@@ -638,6 +651,16 @@ labels[j] = input_ids[j]  <span class="tk-c"># only for assistant response token
     </div>
     <h3>Output</h3>
     <p><code>out/full_sft_{hidden_size}.pth</code> — full SFT weights.</p>
+
+    <h3>Stats & Metrics</h3>
+    <p>In SFT, the primary metric is <strong>Masked CE Loss</strong>. Since it only evaluates the model's ability to predict the assistant's response, the loss drops much faster than pretraining. Watch for signs of overfitting (e.g., training loss dropping near zero while validation loss spikes or generation quality degrades).</p>
+    <div style="margin:16px 0"><img src="./images/sft_loss.jpg" alt="SFT Loss Curve" style="max-width:100%;border-radius:var(--radius);border:1px solid var(--border)"></div>
+    <div style="font-size:0.85rem;color:var(--text-muted);background:var(--surface2);padding:12px 16px;border-radius:var(--radius);border-left:3px solid var(--green);margin-bottom:12px;">
+      <strong style="color:var(--text);">Graph Explanation:</strong><br>
+      • <strong>X-axis (Step):</strong> Training steps over the fine-tuning dataset.<br>
+      • <strong>Y-axis (Loss):</strong> Masked Cross-Entropy Loss (only assistant tokens).<br>
+      • <strong>Trend:</strong> Unlike pretraining, this curve starts much lower and drops very fast because the model already knows language. It is simply learning the "format" of being a helpful assistant (e.g., starting answers with "Sure, here is...").
+    </div>
   </div>
 </div>
 </section>
@@ -737,6 +760,9 @@ flowchart TD
     </div>
     <h3>Output</h3>
     <p><code>out/lora_{name}_{hidden_size}.pth</code> — only LoRA weights (~300 KB).</p>
+
+    <h3>Stats & Metrics</h3>
+    <p>LoRA training tracks the same <strong>Masked CE Loss</strong> as SFT. Because LoRA trains less than 1% of the model's parameters, the loss curve might look noisier or decrease slightly slower than full fine-tuning. However, it prevents catastrophic forgetting of the base model's knowledge.</p>
   </div>
 </div>
 </section>
@@ -855,6 +881,13 @@ flowchart LR
     </div>
     <h3>Output</h3>
     <p><code>out/dpo_{hidden_size}.pth</code> — updated policy weights.</p>
+
+    <h3>Stats & Metrics</h3>
+    <p>In DPO, you monitor the <strong>DPO Loss</strong>, which indirectly optimises the reward gap. Key metrics logged usually include:</p>
+    <ul>
+      <li><strong>Policy Reward Margin:</strong> The difference in implicit reward between chosen and rejected pairs (should steadily increase).</li>
+      <li><strong>Chosen/Rejected Log-Probs:</strong> Log-probabilities of chosen responses should increase, while rejected responses decrease.</li>
+    </ul>
   </div>
 </div>
 </section>
@@ -965,6 +998,22 @@ flowchart LR
     </div>
     <h3>Output</h3>
     <p><code>out/ppo_actor_{hidden_size}.pth</code> — actor weights. Resume checkpoint also saves critic + optimizers.</p>
+
+    <h3>Stats & Metrics</h3>
+    <p>PPO involves multiple moving parts, so you monitor a suite of metrics in wandb/tensorboard:</p>
+    <ul>
+      <li><strong>Actor Loss:</strong> The policy objective (clipped surrogate).</li>
+      <li><strong>Critic/Value Loss:</strong> How accurately the value model predicts the reward.</li>
+      <li><strong>KL Divergence:</strong> Measures how far the policy drifts from the reference model. High KL means the model is "reward hacking" and losing language capability.</li>
+      <li><strong>Reward:</strong> The average score from the Reward Model (should rise steadily).</li>
+    </ul>
+    <div style="margin:16px 0"><img src="./images/ppo_loss.jpg" alt="PPO Loss Curve" style="max-width:100%;border-radius:var(--radius);border:1px solid var(--border)"></div>
+    <div style="font-size:0.85rem;color:var(--text-muted);background:var(--surface2);padding:12px 16px;border-radius:var(--radius);border-left:3px solid var(--orange);margin-bottom:12px;">
+      <strong style="color:var(--text);">Graph Explanation:</strong><br>
+      • <strong>X-axis (Step):</strong> PPO rollout & update steps.<br>
+      • <strong>Y-axis (Values):</strong> A composite of multiple metrics. Typically, <em>Actor Loss</em> oscillates near zero, <em>Critic Loss</em> drops as the value network gets better at predicting rewards, and <em>Reward</em> climbs upwards.<br>
+      • <strong>Trend:</strong> You will see the total Reward line steadily increasing as the model learns to generate answers that the Reward Model prefers. If KL divergence shoots up rapidly, the model is "hacking" the reward and losing text quality.
+    </div>
   </div>
 </div>
 </section>
@@ -1076,6 +1125,21 @@ per_token_loss = -(torch.<span class="tk-bi">min</span>(ratio * adv.unsqueeze(<s
     </div>
     <h3>Output</h3>
     <p><code>out/grpo_{hidden_size}.pth</code> — updated policy weights.</p>
+
+    <h3>Stats & Metrics</h3>
+    <p>GRPO tracks similar metrics to PPO but without the Critic Loss. Key indicators are:</p>
+    <ul>
+      <li><strong>GRPO/CISPO Policy Loss:</strong> The group-normalised surrogate loss.</li>
+      <li><strong>Reward / Group Advantage:</strong> The relative reward scores within the generated samples.</li>
+      <li><strong>KL Divergence:</strong> Essential to monitor to ensure the policy remains stable.</li>
+    </ul>
+    <div style="margin:16px 0"><img src="./images/grpo_loss.jpg" alt="GRPO Loss Curve" style="max-width:100%;border-radius:var(--radius);border:1px solid var(--border)"></div>
+    <div style="font-size:0.85rem;color:var(--text-muted);background:var(--surface2);padding:12px 16px;border-radius:var(--radius);border-left:3px solid var(--orange);margin-bottom:12px;">
+      <strong style="color:var(--text);">Graph Explanation:</strong><br>
+      • <strong>X-axis (Step):</strong> GRPO training iterations.<br>
+      • <strong>Y-axis (Values):</strong> Group-normalized advantages and surrogate policy loss.<br>
+      • <strong>Trend:</strong> Because there is no Critic network, the loss curve is purely driven by the policy's log-probabilities scaled by the relative advantage of responses in a group. A healthy graph shows the average reward score of the group rising smoothly without the KL divergence penalty overwhelming the objective.
+    </div>
   </div>
 </div>
 </section>
@@ -1178,6 +1242,21 @@ flowchart TD
     </div>
     <h3>Output</h3>
     <p><code>out/agent_{hidden_size}.pth</code> — agent-tuned policy weights.</p>
+
+    <h3>Stats & Metrics</h3>
+    <p>Agentic RL is complex, combining tool use with reasoning. Key metrics include:</p>
+    <ul>
+      <li><strong>Agent RL Loss:</strong> The overall policy optimisation loss.</li>
+      <li><strong>Tool Call Accuracy:</strong> The percentage of valid, correctly formatted tool calls out of all generation attempts.</li>
+      <li><strong>Ground Truth (GT) Score:</strong> How often the final response contains the verifiable correct answer.</li>
+    </ul>
+    <div style="margin:16px 0"><img src="./images/agent_rl_loss.jpg" alt="Agent RL Loss Curve" style="max-width:100%;border-radius:var(--radius);border:1px solid var(--border)"></div>
+    <div style="font-size:0.85rem;color:var(--text-muted);background:var(--surface2);padding:12px 16px;border-radius:var(--radius);border-left:3px solid var(--purple);margin-bottom:12px;">
+      <strong style="color:var(--text);">Graph Explanation:</strong><br>
+      • <strong>X-axis (Step):</strong> Agent training rollouts.<br>
+      • <strong>Y-axis (Score/Loss):</strong> Multi-dimensional rewards (Tool usage correctness, ground truth verification).<br>
+      • <strong>Trend:</strong> Early in the graph, tool syntax errors might be high, causing negative rewards. As training progresses, the model learns the exact JSON syntax for tools (causing a sharp bump in reward), followed by a slower climb as it learns to actually use the tools <em>correctly</em> to find the ground truth answer.
+    </div>
   </div>
 </div>
 </section>
@@ -1279,6 +1358,14 @@ flowchart LR
     </div>
     <h3>Output</h3>
     <p><code>out/full_dist_{student_hidden_size}.pth</code> — distilled student weights.</p>
+
+    <h3>Stats & Metrics</h3>
+    <p>In Distillation, you monitor two competing loss terms:</p>
+    <ul>
+      <li><strong>Cross-Entropy (Hard Loss):</strong> How well the student predicts the actual ground-truth tokens.</li>
+      <li><strong>KL Divergence (Soft Loss):</strong> How closely the student's probability distribution matches the teacher's softened distribution.</li>
+    </ul>
+    <p>Both should decrease, indicating the student is absorbing both factual knowledge (hard) and reasoning nuance (soft).</p>
   </div>
 </div>
 </section>
@@ -1386,6 +1473,9 @@ flowchart LR
     </div>
     <h3>Output</h3>
     <p><code>model_learn_tokenizer/tokenizer.json</code> + <code>tokenizer_config.json</code> with HuggingFace-compatible chat template.</p>
+
+    <h3>Stats & Metrics</h3>
+    <p>When training a BPE tokenizer, the key metric is the <strong>Compression Ratio</strong>. It measures how many raw characters are represented by a single token on average. A higher compression ratio means the model can pack more text into its context window. For MiniMind, the target vocab size is explicitly fixed at 6400.</p>
   </div>
 </div>
 </section>
@@ -1471,6 +1561,9 @@ flowchart LR
       </tbody>
     </table>
     </div>
+
+    <h3>Stats & Metrics</h3>
+    <p>The rollout engine's primary metric is <strong>Throughput (tokens/sec)</strong> and <strong>Latency</strong>. The Torch engine provides a reliable baseline, but the SGLang engine will typically show significantly higher token generation throughput due to optimizations like RadixAttention and continuous batching.</p>
   </div>
 </div>
 </section>
@@ -1533,6 +1626,9 @@ flowchart LR
       <div class="utils-card"><div class="fn">Logger(content)</div><div class="desc">Prints only on rank-0 in DDP mode — avoids duplicate logs.</div></div>
       <div class="utils-card"><div class="fn">is_main_process()</div><div class="desc">Returns <code>True</code> if rank 0 or non-distributed.</div></div>
     </div>
+
+    <h3>Stats & Metrics</h3>
+    <p>The utilities script handles <strong>Learning Rate (LR)</strong> tracking. When logged to wandb, the LR curve will perfectly match the cosine decay formula, starting at peak $\eta_{\max}$ and gracefully dropping to 10% of that value by the final epoch.</p>
   </div>
 </div>
 </section>
@@ -1602,6 +1698,9 @@ flowchart TD
 
     <h3>AgentRLDataset</h3>
     <p>Parses tool definitions from system messages, returns <code>{"messages": [...], "tools": {...}, "gt": [...]}</code> for multi-turn agentic rollouts.</p>
+
+    <h3>Stats & Metrics</h3>
+    <p>Dataset metrics usually revolve around <strong>Sequence Length Distribution</strong> and <strong>Token Padding Ratio</strong>. Efficient datasets have lengths clustered closely around the `max_seq_len`, minimizing wasted computation on `-100` padded tokens.</p>
   </div>
 </div>
 </section>
@@ -1672,6 +1771,9 @@ flowchart LR
     <p style="text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:8px;">
       During training: $h = W_{\text{base}}x + BAx$ &nbsp;·&nbsp; After merge: $h = (W_{\text{base}} + BA)x$
     </p>
+
+    <h3>Stats & Metrics</h3>
+    <p>At the implementation level, the critical metric is the <strong>Trainable Parameter Ratio</strong>. The console output from `get_model_params()` will show a dramatic reduction—usually indicating only $pprox 0.8\%$ to $2\%$ of the total parameters require gradients, explaining the massive VRAM savings.</p>
   </div>
 </div>
 </section>
